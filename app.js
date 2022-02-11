@@ -1,6 +1,20 @@
 const express=require("express");
 const app=express();
-const port=process.env.port || 3000;
-app.listen(port,()=>{
-    console.log(`listening to the server at port ${port}`);
-});
+// const router=require('./routing.js');
+const log=require('./winston-logger.js');
+const rTracer=require('cls-rtracer');
+
+const bodyParser = require('body-parser');
+const routeLogger=require('./middleware/route-logger');
+// using body parser
+app.use(bodyParser.json())
+// replacing app with router for route handlers
+
+app.use(rTracer.expressMiddleware({
+    useHeader: true,
+    headerName: 'X-Request-Id'
+}))
+app.use(routeLogger);
+module.exports=app.listen(3000,()=>{
+    log.info('listening from port 3000')
+})
